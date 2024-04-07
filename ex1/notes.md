@@ -13,7 +13,7 @@ En otras palabras, se trata de decidir qué objeto o concepto está presente en 
 
 ![picuture](pictures/detection3.png)
 
-![picuture](pictures/detection4.png)
+![picuture](pictures/detection5.png)
 
 
 * <p><b><u>Localización de Objetos</b></u>:</p>
