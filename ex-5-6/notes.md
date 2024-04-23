@@ -16,9 +16,9 @@ La localización de objetos construye coordenadas para cada objeto o region de i
 ROI delimitadoras ayudan a la máquina a reconocer y ubicar cada objeto específico.
 <p><b>Ejemplo</b>: En una imagen de una ciudad, varias regiones de interes, por ejemplo autos y personas. </p>
 
-![picuture](pictures/classification1.png)
+![picuture](pictures/classification1.jpg)
 
-![picuture](pictures/classification2.png)
+![picuture](pictures/classification2.jpg)
 
 ![picuture](pictures/detection1.png)
 
