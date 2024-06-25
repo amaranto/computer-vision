@@ -7,7 +7,9 @@
 En otras palabras, se trata de decidir qué objeto o concepto está presente en la imagen.</p>
 <p><b>Ejemplo</b>: Si vemos una foto de un animal, la clasificación nos diría que es una imagen de un perro o un gato.</p>
 
-![picuture](pictures/class.png)
+![picuture](pictures/classification1.jpg)
+
+![picuture](pictures/classification2.jpg)
 
 * <p><b><u>Localización de Objetos</b></u>:</p>
 La localización de objetos indica dónde se encuentra el objeto en la imagen.
@@ -15,10 +17,6 @@ Imagina que tenemos una foto con varios objetos (por ejemplo, personas, coches y
 La localización de objetos construye coordenadas para cada objeto o region de interés (ROI).
 ROI delimitadoras ayudan a la máquina a reconocer y ubicar cada objeto específico.
 <p><b>Ejemplo</b>: En una imagen de una ciudad, varias regiones de interes, por ejemplo autos y personas. </p>
-
-![picuture](pictures/classification1.png)
-
-![picuture](pictures/classification2.png)
 
 ![picuture](pictures/detection1.png)
 
