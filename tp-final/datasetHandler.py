@@ -68,7 +68,7 @@ def bnd_box_to_yolo_line(box,img_size):
         (x_min, y_min) = (box[0], box[1])
         (w, h) = (box[2], box[3])
         x_max = x_min+w
-        y_max = x_max+h
+        y_max = y_min+h
         
         x_center = float((x_min + x_max)) / 2 / img_size[1]
         y_center = float((y_min + y_max)) / 2 / img_size[0]
