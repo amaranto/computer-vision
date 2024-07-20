@@ -23,13 +23,14 @@ for d in datasets:
     splitted_url = d.split("/")
     url, id, output = splitted_url[:-1], splitted_url[-1], splitted_url[-1].split("?")[0]
     
-    if "folders" in url:
-        output = f"{BASE_PATH}/{output}"
-        #gdown.download_folder(d, output=output, quiet=False)
-    else:
+    output = f"{BASE_PATH}/{output}" if "folders" in url else  f"{BASE_PATH}/{output}.zip"
+
+    if "folders" in url and not os.path.exists(output):
+        gdown.download_folder(d, output=output, quiet=False)
+        
+    elif os.path.isfile(output):
         d = d.replace("file/d/", "uc?id=")
-        output = f"{BASE_PATH}/{output}.zip"
-        #gdown.download(d, output=output, quiet=False, fuzzy=True)
+        gdown.download(d, output=output, quiet=False, fuzzy=True)
         shutil.unpack_archive(output, f"{RAW_DATASET}/")
 
 def bnd_box_to_yolo_line(box,img_size):
