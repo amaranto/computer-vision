@@ -71,7 +71,7 @@ def main():
         images = glob.glob(image_folder + "/*.jpg")
         images += glob.glob(image_folder + "/*.png")
         images += glob.glob(image_folder + "/*.jpeg")
-        images = images[:5]
+        images = images
 
         for img in images:
 
