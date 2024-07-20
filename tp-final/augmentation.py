@@ -9,7 +9,6 @@ from config import BASE_PATH, yolo_ds_config, yolo_ds_dirs
 OUTPUT_CHEK_FOLDER = os.getenv("OUTPUT_FOLDER", f"./{BASE_PATH}/augmentation-check/")
 os.makedirs(OUTPUT_CHEK_FOLDER, exist_ok=True)
 
-
 def draw_bbox(img, bbox, class_name, color=(255, 0, 0), thickness=2)->np.ndarray:
 
     x_min, y_min, w, h = bbox 
@@ -17,15 +16,15 @@ def draw_bbox(img, bbox, class_name, color=(255, 0, 0), thickness=2)->np.ndarray
 
     cv.rectangle(img, (x_min, y_min), (x_max, y_max), color=color, thickness=thickness)
 
-    ((text_width, text_height), _) = cv.getTextSize(class_name, cv.FONT_HERSHEY_SIMPLEX, 0.8, 1)
+    ((text_width, text_height), _) = cv.getTextSize(class_name, cv.FONT_HERSHEY_SIMPLEX, 2, 3)
     cv.rectangle(img, (x_min, y_min - int(1.3 * text_height)), (x_min + text_width, y_min), color, -1)
     cv.putText(
         img,
         text=class_name,
         org=(x_min, y_min - int(0.3 * text_height)),
-        fontFace=cv.FONT_HERSHEY_SIMPLEX,
-        fontScale=0.8,
-        color=color,
+        fontFace=cv.FONT_HERSHEY_TRIPLEX,
+        fontScale=2,
+        color=(255, 255, 255),
         lineType=cv.LINE_AA,
     )
     return img
