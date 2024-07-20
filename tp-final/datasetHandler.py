@@ -7,15 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import unidecode
 import shutil
-
+from config import BASE_PATH, RAW_DATASET, YOLO_DATASET, CONVERTER_OUTPUT, yolo_ds_dirs, yolo_ds_config
 datasets = [
     "https://drive.google.com/file/d/1u7eRhAuarRWJNNMTsdRIh18fBL3Lhlka/view?usp=sharing",
 ]
 
-BASE_PATH = "dataset"
-RAW_DATASET = f"{BASE_PATH}/dowloaded/"
-DST_DATASET = f"{BASE_PATH}/yolo-format"
-CONVERTER_OUTPUT = f"{BASE_PATH}/bbox_check_folder"
 
 os.makedirs(BASE_PATH, exist_ok=True)
 os.makedirs(RAW_DATASET, exist_ok=True)
@@ -29,40 +25,12 @@ for d in datasets:
     
     if "folders" in url:
         output = f"{BASE_PATH}/{output}"
-        gdown.download_folder(d, output=output, quiet=False)
+        #gdown.download_folder(d, output=output, quiet=False)
     else:
         d = d.replace("file/d/", "uc?id=")
         output = f"{BASE_PATH}/{output}.zip"
-        gdown.download(d, output=output, quiet=False, fuzzy=True)
+        #gdown.download(d, output=output, quiet=False, fuzzy=True)
         shutil.unpack_archive(output, f"{RAW_DATASET}/")
-
-yolo_ds_dirs = {
-    "img_train": DST_DATASET + "/images/train/",
-    "img_val": DST_DATASET + "/images/val/",
-    "lbl_train": DST_DATASET + "/labels/train/",
-    "lbl_val": DST_DATASET + "/labels/val/"
-}
-
-yolo_ds_config = {
-"train": "./images/train/",
-"val": "./images/val/",
-"nc": 51,
-"names": [
-    "1O", "1C", "1E", "1B", 
-    "2O", "2C", "2E", "2B", 
-    "3O", "3C", "3E", "3B", 
-    "4O", "4C", "4E", "4B", 
-    "5O", "5C", "5E", "5B", 
-    "6O", "6C", "6E", "6B", 
-    "7O", "7C", "7E", "7B", 
-    "8O", "8C", "8E", "8B", 
-    "9O", "9C", "9E", "9B", 
-    "10O", "10C", "10E", "10B", 
-    "11O", "11C", "11E", "11B", 
-    "12O", "12C", "12E", "12B", 
-    "J", "SKIP", "SSKIP"
-]
-}
 
 def bnd_box_to_yolo_line(box,img_size):
         (x_min, y_min) = (box[0], box[1])
@@ -77,6 +45,23 @@ def bnd_box_to_yolo_line(box,img_size):
         h = float((y_max - y_min)) / img_size[0]
 
         return np.float64(x_center), np.float64(y_center), np.float64(w), np.float64(h)
+
+def validate_box_into_crop(img, box):
+    (x_min, y_min) = (box[0], box[1])
+    (w, h) = (box[2], box[3])
+    x_max = x_min+w
+    y_max = y_min+h
+
+    if x_min < 0:
+        x_min = 0
+    if y_min < 0:
+        y_min = 0
+    if x_max > img.shape[1]:
+        x_max = img.shape[1]
+    if y_max > img.shape[0]:
+        y_max = img.shape[0]
+
+    return x_min, y_min, x_max, y_max
 
 dirnames = os.listdir(RAW_DATASET)
 print(f"Found { len(dirnames) } folders but working on {dirnames[0]}")
@@ -149,10 +134,10 @@ print("Creating YOLO dataset...")
 for k,d in yolo_ds_dirs.items():
     os.makedirs(d, exist_ok=True)
 
-with open(f'{DST_DATASET}/data.yaml', 'w') as outfile:
+with open(f'{YOLO_DATASET}/data.yaml', 'w') as outfile:
     yaml.dump(yolo_ds_config, outfile, default_flow_style=False)
 
-with open(f'{DST_DATASET}/classes.txt', 'w') as outfile:
+with open(f'{YOLO_DATASET}/classes.txt', 'w') as outfile:
     outfile.writelines("\n".join(yolo_ds_config["names"]))
 
 label_files = glob.glob(f"{working_dir}/*.txt")
