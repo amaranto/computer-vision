@@ -4,6 +4,7 @@ BASE_PATH = os.getenv("DATA_PATH", "./datasets")
 RAW_DATASET = f"{BASE_PATH}/dowloaded/"
 YOLO_DATASET = f"{BASE_PATH}/yolo-format"
 CONVERTER_OUTPUT = f"{BASE_PATH}/output/bbox_check_folder/"
+SAVE_CHECK_IMAGE = os.getenv("SAVE_CHECK_IMAGE", "true").lower() == "true"
 
 yolo_ds_dirs = {
     "img_train": YOLO_DATASET + "/images/train/",
