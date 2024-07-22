@@ -74,121 +74,130 @@ def main():
         images = images
         
         for j,img in enumerate(images):
-            print("-"*50)
-            print(f"Image: {img} {j}/{len(images)}")
-            
-            img_base_name = os.path.basename(img).split(".")
-            img_base_name = ".".join(img_base_name[:-1])
+            try:
+                print("-"*50)
+                print(f"Image: {img} {j}/{len(images)}")
 
-            orig = Image.open(img)
-            fixed_orig = ImageOps.exif_transpose(orig)
-            image = np.asarray(fixed_orig).copy()
+                img_base_name = os.path.basename(img).split(".")
+                img_base_name = ".".join(img_base_name[:-1])
 
-            b_boxes = []
-            category_ids = []
+                check_if_was_already_augmented = glob.glob(f"{image_folder}/{img_base_name}_augmented_*.png")
+                if len(check_if_was_already_augmented) > 0:
+                    print(f"Image {img_base_name} already augmented")
+                    continue
 
-            with open(f"{label_folder}/{img_base_name}.txt", "r") as f:
+                orig = Image.open(img)
+                fixed_orig = ImageOps.exif_transpose(orig)
+                image = np.asarray(fixed_orig).copy()
 
-                content = f.readlines()
-                for line in content:
-                    line = line.split()
-                    b_boxes += [ [float(p) for p in line[1:]] ]
-                    category_ids += [int(line[0])]
+                b_boxes = []
+                category_ids = []
 
-            aug_all = [
-                A.Compose(
-                    [
-                        A.RandomBrightnessContrast(p=1.0),
-                    ],
-                    bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
-                ),
-                A.Compose(
-                    [
-                        A.RandomBrightnessContrast(p=1.0),
-                        A.Perspective(p=1.0),
-                    ],
-                    bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
-                ),                
-                A.Compose(
-                    [
-                        A.HorizontalFlip(p=1.0),
-                        A.RandomBrightnessContrast(p=1.0),
-                        A.RandomRotate90(p=1.0),
-                        A.MedianBlur(blur_limit=7, p=1.0),
-                    ],
-                    bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
-                ),
+                with open(f"{label_folder}/{img_base_name}.txt", "r") as f:
 
-                A.Compose(
-                    [
-                        A.HorizontalFlip(p=0.5),
-                        A.RandomBrightnessContrast(p=0.5),
-                        A.RandomRotate90(p=0.5),
-                        A.MedianBlur(blur_limit=7, p=0.5)
-                    ],
-                    bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
-                ),
-                A.Compose(
-                    [
-                        A.Resize(1024,1024),
-                        A.RandomBrightnessContrast(p=0.5),
-                        A.RandomRotate90(p=0.5),
-                        A.Flip(p=1.0),
-                    ],
-                    bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
-                ),
-                A.Compose(
-                    [
-                        A.Resize(1024,1024),
-                        A.RandomBrightnessContrast(p=0.5),
-                        A.RandomRotate90(p=0.5),
-                    ],
-                    bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
-                ),                
-                A.Compose(
-                    [
-                        A.Resize(640,640),
-                        A.RandomBrightnessContrast(p=0.5),
-                        A.RandomRotate90(p=0.5),
-                    ],
-                    bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
-                ),      
-                A.Compose(
-                    [
-                        A.MedianBlur(blur_limit=7, p=1.0),
-                        A.RandomBrightnessContrast(p=0.2),
-                        A.RandomRotate90(p=1.0),
-                        A.Flip(p=1.0),
-                    ],
-                    bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
-                )            
-            ]
+                    content = f.readlines()
+                    for line in content:
+                        line = line.split()
+                        b_boxes += [ [float(p) for p in line[1:]] ]
+                        category_ids += [int(line[0])]
 
-            aug_imgs = agumentation(
-                image, 
-                b_boxes,
-                aug_all,
-                category_ids
-            ) 
+                aug_all = [
+                    A.Compose(
+                        [
+                            A.RandomBrightnessContrast(p=1.0),
+                        ],
+                        bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
+                    ),
+                    A.Compose(
+                        [
+                            A.RandomBrightnessContrast(p=1.0),
+                            A.Perspective(p=1.0),
+                        ],
+                        bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
+                    ),                
+                    A.Compose(
+                        [
+                            A.HorizontalFlip(p=1.0),
+                            A.RandomBrightnessContrast(p=1.0),
+                            A.RandomRotate90(p=1.0),
+                            A.MedianBlur(blur_limit=7, p=1.0),
+                        ],
+                        bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
+                    ),
 
-            for i,transformed in enumerate(aug_imgs):
-                dst_img = f"{image_folder}/{img_base_name}_augmented_{i}.png"
-                dst_label = f"{label_folder}/{img_base_name}_augmented_{i}.txt"
+                    A.Compose(
+                        [
+                            A.HorizontalFlip(p=0.5),
+                            A.RandomBrightnessContrast(p=0.5),
+                            A.RandomRotate90(p=0.5),
+                            A.MedianBlur(blur_limit=7, p=0.5)
+                        ],
+                        bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
+                    ),
+                    A.Compose(
+                        [
+                            A.Resize(1024,1024),
+                            A.RandomBrightnessContrast(p=0.5),
+                            A.RandomRotate90(p=0.5),
+                            A.Flip(p=1.0),
+                        ],
+                        bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
+                    ),
+                    A.Compose(
+                        [
+                            A.Resize(1024,1024),
+                            A.RandomBrightnessContrast(p=0.5),
+                            A.RandomRotate90(p=0.5),
+                        ],
+                        bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
+                    ),                
+                    A.Compose(
+                        [
+                            A.Resize(640,640),
+                            A.RandomBrightnessContrast(p=0.5),
+                            A.RandomRotate90(p=0.5),
+                        ],
+                        bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
+                    ),      
+                    A.Compose(
+                        [
+                            A.MedianBlur(blur_limit=7, p=1.0),
+                            A.RandomBrightnessContrast(p=0.2),
+                            A.RandomRotate90(p=1.0),
+                            A.Flip(p=1.0),
+                        ],
+                        bbox_params=A.BboxParams(format='yolo', label_fields=['category_ids']),
+                    )            
+                ]
 
-                print(f"Image: {img} Destiny:{dst_img} Label: {dst_label} Aug: {i}/{len(aug_imgs)}")
-                
-                visualize(
-                    transformed['image'].copy(),
-                    transformed['bboxes_xywh'].copy(),
-                    transformed['category_ids'].copy(),
-                    classes,
-                    output_file=f"{OUTPUT_CHEK_FOLDER}/{img_base_name}_{i}.png" if SAVE_CHECK_IMAGE else None
-                )
+                aug_imgs = agumentation(
+                    image, 
+                    b_boxes,
+                    aug_all,
+                    category_ids
+                ) 
 
-                aug_img = Image.fromarray(transformed['image'].copy())
-                aug_img.save(dst_img)
+                for i,transformed in enumerate(aug_imgs):
+                    dst_img = f"{image_folder}/{img_base_name}_augmented_{i}.png"
+                    dst_label = f"{label_folder}/{img_base_name}_augmented_{i}.txt"
 
-                with open(dst_label, "w") as f:
-                    for i,(x,y,w,h) in enumerate(transformed['bboxes']):
-                        f.write(f"{category_ids[i]} {x} {y} {w} {h}\n")   
+                    print(f"Image: {img} Destiny:{dst_img} Label: {dst_label} Aug: {i}/{len(aug_imgs)}")
+                    
+                    visualize(
+                        transformed['image'].copy(),
+                        transformed['bboxes_xywh'].copy(),
+                        transformed['category_ids'].copy(),
+                        classes,
+                        output_file=f"{OUTPUT_CHEK_FOLDER}/{img_base_name}_{i}.png" if SAVE_CHECK_IMAGE else None
+                    )
+
+                    aug_img = Image.fromarray(transformed['image'].copy())
+                    aug_img.save(dst_img)
+
+                    with open(dst_label, "w") as f:
+                        for i,(x,y,w,h) in enumerate(transformed['bboxes']):
+                            f.write(f"{category_ids[i]} {x} {y} {w} {h}\n")   
+            except Exception as e:
+                print(f"Error: {e}")
+                continue
 main()
