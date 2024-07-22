@@ -1,4 +1,4 @@
-import glob, os
+import glob, os, re
 import cv2 as cv
 import numpy as np
 import albumentations as A
@@ -82,7 +82,7 @@ def main():
                 img_base_name = ".".join(img_base_name[:-1])
 
                 check_if_was_already_augmented = glob.glob(f"{image_folder}/{img_base_name}*")
-                if len(check_if_was_already_augmented) > 1:
+                if len(check_if_was_already_augmented) > 1 or re.match(r".*augmented.*", img_base_name):
                     print(f"Image {img_base_name} already augmented")
                     continue
 
