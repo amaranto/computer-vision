@@ -81,8 +81,8 @@ def main():
                 img_base_name = os.path.basename(img).split(".")
                 img_base_name = ".".join(img_base_name[:-1])
 
-                check_if_was_already_augmented = glob.glob(f"{image_folder}/{img_base_name}_augmented_*.png")
-                if len(check_if_was_already_augmented) > 0:
+                check_if_was_already_augmented = glob.glob(f"{image_folder}/{img_base_name}*")
+                if len(check_if_was_already_augmented) > 1:
                     print(f"Image {img_base_name} already augmented")
                     continue
 
@@ -199,5 +199,4 @@ def main():
                             f.write(f"{category_ids[i]} {x} {y} {w} {h}\n")   
             except Exception as e:
                 print(f"Error: {e}")
-                continue
 main()
