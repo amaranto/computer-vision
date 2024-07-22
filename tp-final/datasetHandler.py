@@ -28,7 +28,7 @@ for d in datasets:
     if "folders" in url and not os.path.exists(output):
         gdown.download_folder(d, output=output, quiet=False)
         
-    elif os.path.isfile(output):
+    elif not os.path.isfile(output):
         d = d.replace("file/d/", "uc?id=")
         gdown.download(d, output=output, quiet=False, fuzzy=True)
         shutil.unpack_archive(output, f"{RAW_DATASET}/")

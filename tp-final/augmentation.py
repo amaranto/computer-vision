@@ -3,7 +3,7 @@ import cv2 as cv
 import numpy as np
 import albumentations as A
 import matplotlib.pyplot as plt
-from PIL import Image
+from PIL import Image, ImageOps
 from config import BASE_PATH, yolo_ds_config, yolo_ds_dirs
 
 OUTPUT_CHEK_FOLDER = os.getenv("OUTPUT_FOLDER", f"./{BASE_PATH}/augmentation-check/")
@@ -51,15 +51,15 @@ def agumentation(img, bboxes, augs, category_ids )->list[dict]:
     results = []
 
     for aug in augs:
+        transform = None
         transform = aug
         
-        
-        transformed = transform(image=img, bboxes=bboxes.copy(), category_ids=category_ids)
+        transformed = transform(image=img.copy(), bboxes=bboxes.copy(), category_ids=category_ids)
         img_y, img_x,_ = transformed['image'].shape
         transformed_bboxes = [ [x-w/2,y-h/2,w,h] * np.array([img_x,img_y,img_x,img_y]) for x,y,w,h in transformed['bboxes'] ]
         transformed["bboxes_xywh"] = transformed_bboxes
 
-        results.append(transformed)
+        results.append(transformed.copy())
 
     return results
 
@@ -68,23 +68,30 @@ def main():
     classes = { i: name for i,name in enumerate(yolo_ds_config["names"]) }
 
     for label_folder, image_folder in [ (yolo_ds_dirs["lbl_train"], yolo_ds_dirs["img_train"]) , ((yolo_ds_dirs["lbl_val"], yolo_ds_dirs["img_val"])) ]:
-        images = glob.glob(image_folder + "/*.jpg")
-        images += glob.glob(image_folder + "/*.png")
-        images += glob.glob(image_folder + "/*.jpeg")
+        images = glob.glob(image_folder + "/64191_Sofia_BrizuelaCipolletti*.jpg")
+        images += glob.glob(image_folder + "/64191_Sofia_BrizuelaCipolletti*.png")
+        images += glob.glob(image_folder + "/64191_Sofia_BrizuelaCipolletti*.jpeg")
         images = images
-
+        
         for img in images:
 
             img_base_name = os.path.basename(img).split(".")
             img_base_name = ".".join(img_base_name[:-1])
 
             orig = Image.open(img)
-            image = np.asarray(orig)
+            fixed_orig = ImageOps.exif_transpose(orig)
+            image = np.asarray(fixed_orig).copy()
+
+            b_boxes = []
+            category_ids = []
 
             with open(f"{label_folder}/{img_base_name}.txt", "r") as f:
+
                 content = f.readlines()
-                b_boxes = [ [ float(p) for p in line.split()[1:] ] for line in content ]
-                category_ids = [ int(line.split()[0]) for line in content ]
+                for line in content:
+                    line = line.split()
+                    b_boxes += [ [float(p) for p in line[1:]] ]
+                    category_ids += [int(line[0])]
 
             aug_all = [
                 A.Compose(
@@ -163,16 +170,18 @@ def main():
             ) 
 
             for i,transformed in enumerate(aug_imgs):
+
                 visualize(
-                    transformed['image'],
-                    transformed['bboxes_xywh'],
-                    transformed['category_ids'],
+                    transformed['image'].copy(),
+                    transformed['bboxes_xywh'].copy(),
+                    transformed['category_ids'].copy(),
                     classes,
                     output_file=f"{OUTPUT_CHEK_FOLDER}/{img_base_name}_{i}.png"
                 )
 
-                aug_img = Image.fromarray(transformed['image'])
+                aug_img = Image.fromarray(transformed['image'].copy())
                 aug_img.save(f"{image_folder}/{img_base_name}_augmented_{i}.png")
+
                 with open(f"{label_folder}/{img_base_name}_augmented_{i}.txt", "w") as f:
                     for i,(x,y,w,h) in enumerate(transformed['bboxes']):
                         f.write(f"{category_ids[i]} {x} {y} {w} {h}\n")   
