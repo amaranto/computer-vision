@@ -4,7 +4,7 @@ import numpy as np
 import albumentations as A
 import matplotlib.pyplot as plt
 from PIL import Image, ImageOps
-from config import BASE_PATH, yolo_ds_config, yolo_ds_dirs
+from config import BASE_PATH, SAVE_CHECK_IMAGE, yolo_ds_config, yolo_ds_dirs
 
 OUTPUT_CHEK_FOLDER = os.getenv("OUTPUT_FOLDER", f"./{BASE_PATH}/augmentation-check/")
 os.makedirs(OUTPUT_CHEK_FOLDER, exist_ok=True)
@@ -68,13 +68,15 @@ def main():
     classes = { i: name for i,name in enumerate(yolo_ds_config["names"]) }
 
     for label_folder, image_folder in [ (yolo_ds_dirs["lbl_train"], yolo_ds_dirs["img_train"]) , ((yolo_ds_dirs["lbl_val"], yolo_ds_dirs["img_val"])) ]:
-        images = glob.glob(image_folder + "/64191_Sofia_BrizuelaCipolletti*.jpg")
-        images += glob.glob(image_folder + "/64191_Sofia_BrizuelaCipolletti*.png")
-        images += glob.glob(image_folder + "/64191_Sofia_BrizuelaCipolletti*.jpeg")
+        images = glob.glob(image_folder + "/*.jpg")
+        images += glob.glob(image_folder + "/*.png")
+        images += glob.glob(image_folder + "/*.jpeg")
         images = images
         
-        for img in images:
-
+        for j,img in enumerate(images):
+            print("-"*50)
+            print(f"Image: {img} {j}/{len(images)}")
+            
             img_base_name = os.path.basename(img).split(".")
             img_base_name = ".".join(img_base_name[:-1])
 
@@ -170,19 +172,23 @@ def main():
             ) 
 
             for i,transformed in enumerate(aug_imgs):
+                dst_img = f"{image_folder}/{img_base_name}_augmented_{i}.png"
+                dst_label = f"{label_folder}/{img_base_name}_augmented_{i}.txt"
 
+                print(f"Image: {img} Destiny:{dst_img} Label: {dst_label} Aug: {i}/{len(aug_imgs)}")
+                
                 visualize(
                     transformed['image'].copy(),
                     transformed['bboxes_xywh'].copy(),
                     transformed['category_ids'].copy(),
                     classes,
-                    output_file=f"{OUTPUT_CHEK_FOLDER}/{img_base_name}_{i}.png"
+                    output_file=f"{OUTPUT_CHEK_FOLDER}/{img_base_name}_{i}.png" if SAVE_CHECK_IMAGE else None
                 )
 
                 aug_img = Image.fromarray(transformed['image'].copy())
-                aug_img.save(f"{image_folder}/{img_base_name}_augmented_{i}.png")
+                aug_img.save(dst_img)
 
-                with open(f"{label_folder}/{img_base_name}_augmented_{i}.txt", "w") as f:
+                with open(dst_label, "w") as f:
                     for i,(x,y,w,h) in enumerate(transformed['bboxes']):
                         f.write(f"{category_ids[i]} {x} {y} {w} {h}\n")   
 main()
