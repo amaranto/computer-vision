@@ -51,5 +51,5 @@ names:
 - S
 - SS
 nc: 51
-train: ./datasets/yolo-format/images/train/
-val: ./datasets/yolo-format/images/val/
+train: /home/earevalo/augmentation/computer-vision/tp-final/datasets/yolo-format/images/train/
+val: /home/earevalo/augmentation/computer-vision/tp-final/datasets/yolo-format/images/val/
